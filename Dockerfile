@@ -1,9 +1,9 @@
 FROM ubuntu:16.04
 
-MAINTAINER André Stein
+LABEL maintainer="Yury Kondrashov"
 
-EXPOSE 80
-EXPOSE 443
+EXPOSE 8000
+EXPOSE 8082
 
 VOLUME /data
 
@@ -11,7 +11,7 @@ VOLUME /data
 # make sure that SEAFILE_MAJOR matches SEAFILE_VERSION!
 # additional the seafile versions may be passed as --build-arg variables
 # thus overriding this default!
-ARG SEAFILE_VERSION=6.2.3
+ARG SEAFILE_VERSION=6.2.5
 ENV SEAFILE_VERSION ${SEAFILE_VERSION}
 ARG SEAFILE_MAJOR=6.2
 ENV SEAFILE_MAJOR ${SEAFILE_MAJOR}
@@ -19,7 +19,7 @@ ENV SEAFILE_MAJOR ${SEAFILE_MAJOR}
 # Install seafile dependencies and make sure to clean
 # all apt caches
 RUN DEBIAN_FRONTEND=noninteractive apt-get update -q --fix-missing && \
-	apt-get -y install python wget nginx && \
+	apt-get -y install python wget && \
 	apt-get -y install python2.7 libpython2.7 python-setuptools python-imaging python-ldap python-urllib3 sqlite3 && \
 	apt-get autoclean && rm -rf /var/lib/apt/lists/* && \
 	rm -rf /usr/share/locale/* && rm -rf /usr/share/man/* && rm -rf /usr/share/doc/*
@@ -45,10 +45,5 @@ RUN sed -i 's/= ask_admin_password()/= os\.environ\["SEAFILE_ADMIN_PASSWORD"\]/'
 
 # patch seafile's update scripts to be non-interactive
 RUN sed -i 's@read dummy@@g' /seafile/seafile-server-latest/upgrade/upgrade_*sh
-
-# setup nginx configuration files
-RUN rm /etc/nginx/sites-*/*
-COPY target/nginx/seafile-*.conf /etc/nginx/sites-available/
-COPY target/nginx/snippets/* /etc/nginx/snippets/
 
 CMD /usr/local/bin/start-seafile.sh

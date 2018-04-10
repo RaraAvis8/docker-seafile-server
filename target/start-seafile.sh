@@ -68,28 +68,17 @@ if [[ "$current_major" != "${SEAFILE_MAJOR}" ]]; then
     echo "#"
 fi
 
-# Setup nginx
-sed -i "s@%hostname%@${SEAFILE_HOSTNAME}@g" \
-  /etc/nginx/sites-available/*.conf /etc/nginx/snippets/*
-sed -i "s@%cert_file%@${SSL_CERT_FILE:-/etc/ssl/cert.pem}@g" /etc/nginx/sites-available/seafile-https.conf
-sed -i "s@%privkey_file%@${SSL_PRIVKEY_FILE:-/etc/ssl/privkey.pem}@g" /etc/nginx/sites-available/seafile-https.conf
-
-# cleanup old server configuration
-rm -f /etc/nginx/sites-enabled/*
-
 protocol=""
 if [[ "${USE_SSL:-off}" == "off" ]]; then
-    ln -s /etc/nginx/sites-available/seafile-http.conf /etc/nginx/sites-enabled/
     protocol="http"
 else
   echo "Enabling SSL (mode: $USE_SSL)..."
-  ln -s /etc/nginx/sites-available/seafile-https.conf /etc/nginx/sites-enabled/
   protocol="https"
 fi
 
 # Protocol override
 if [[ "${SEAFILE_EXTERNAL_PROTOCOL:-}" != "" ]]; then
-    protocol="${SEAFILE_EXTERNAL_PROTOCOL}"
+   protocol="${SEAFILE_EXTERNAL_PROTOCOL}"
 fi
 
 # patch seafile and seahub configuration for nginx
@@ -103,10 +92,8 @@ echo "FILE_SERVER_ROOT = '$protocol://${SEAFILE_HOSTNAME}:${SEAFILE_EXTERNAL_POR
 cd /seafile/seafile-server-latest
 
 echo "Starting seafile.." && ./seafile.sh start
-echo "Starting seahub..." && ./seahub.sh start-fastcgi
-
-service nginx start || (tail /var/log/nginx/error.log; exit 1;)
+echo "Starting seahub..." && ./seahub.sh start
 
 # Output log files that also keeps container running
-tail -f /var/log/nginx/error.log /var/log/nginx/seahub.error.log /seafile/logs/*.log
 
+tail -f /seafile/logs/*.log
