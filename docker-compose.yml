@@ -8,7 +8,7 @@ services:
       - "6009:8082"
     environment:
       - SEAFILE_EXTERNAL_PORT=443
-      - SEAFILE_HOSTNAME=seafile.yurtagames.com
+      - SEAFILE_HOSTNAME=seafile.example.com
       - SEAFILE_SERVER_NAME=myseafile
       - SEAFILE_ADMIN_MAIL=admin@seafile.com
       - SEAFILE_ADMIN_PASSWORD=test123
@@ -17,9 +17,9 @@ services:
       - ./seafile:/data
       - ./ssl:/etc/ssl
     labels:
-      - traefik.seafile1.frontend.rule=Host:seafile.yurtagames.com;PathPrefixStrip:/seafhttp
+      - traefik.seafile1.frontend.rule=Host:seafile.example.com;PathPrefixStrip:/seafhttp
       - traefik.seafile1.port=8082
-      - traefik.seafile2.frontend.rule=Host:seafile.yurtagames.com
+      - traefik.seafile2.frontend.rule=Host:seafile.example.com
       - traefik.seafile2.port=8000
       - traefik.docker.network=traefik-proxy
     networks:
